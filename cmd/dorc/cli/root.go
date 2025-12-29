@@ -28,6 +28,7 @@ func Execute() error {
 
 func init() {
 	rootCommand.Flags().BoolVar(&tui, "tui", false, "Enable TUI mode")
+	rootCommand.Flags().StringVar(&logLevel, "log-level", "info", "Set log level [debug, info, warn, error, off]")
 }
 
 func Run(cmd *cobra.Command, args []string) {
@@ -39,6 +40,6 @@ func Run(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	logger.SetLogLevel(logger.Info)
+	logger.SetLogLevel(logger.ParseLevel(logLevel))
 	runCLI(c)
 }
