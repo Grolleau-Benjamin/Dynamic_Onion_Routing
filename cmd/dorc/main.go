@@ -1,7 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"github.com/Grolleau-Benjamin/Dynamic_Onion_Routing/cmd/dorc/cli"
+)
 
 func main() {
-	fmt.Println("Hello DOR client!")
+	cli.Execute()
 }
