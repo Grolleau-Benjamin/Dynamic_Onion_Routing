@@ -3,6 +3,7 @@
 ## Documentation
 
 - [Client Cli Architecture](./docs/architecture/client_cli.md)
+- [Client TUI Architecture](./docs/architecture/client_tui.md)
 
 ## Server Daemon
 ```shell
