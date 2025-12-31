@@ -5,7 +5,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func Run(c *client.Client) error {
+func Run(c *client.Client, input client.InputConfig) error {
 	uiEvents := make(chan client.Event, 32)
 
 	go func() {
@@ -15,7 +15,10 @@ func Run(c *client.Client) error {
 		close(uiEvents)
 	}()
 
-	p := tea.NewProgram(NewModel(c, uiEvents))
+	p := tea.NewProgram(
+		NewModel(c, uiEvents, input),
+		tea.WithAltScreen(),
+	)
 	_, err := p.Run()
 	return err
 }

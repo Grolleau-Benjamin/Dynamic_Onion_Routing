@@ -17,6 +17,23 @@ const (
 	Off
 )
 
+func (l Level) String() string {
+	switch l {
+	case Debug:
+		return "Debug"
+	case Info:
+		return "Info"
+	case Warn:
+		return "Warn"
+	case Error:
+		return "Error"
+	case Off:
+		return "Off"
+	default:
+		return "UnknownLogLevel"
+	}
+}
+
 var (
 	currentLevel atomic.Uint32
 )

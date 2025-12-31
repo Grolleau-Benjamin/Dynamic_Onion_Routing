@@ -5,7 +5,7 @@ import (
 	"github.com/Grolleau-Benjamin/Dynamic_Onion_Routing/internal/logger"
 )
 
-func runCLI(c *client.Client) {
+func runCLI(c *client.Client, ctx client.SendContext) {
 	done := make(chan struct{})
 
 	go func() {
@@ -15,7 +15,8 @@ func runCLI(c *client.Client) {
 		close(done)
 	}()
 
-	c.Run()
+	_ = c.Send(ctx)
+	c.Close()
 	<-done
 }
 

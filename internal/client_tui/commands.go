@@ -5,13 +5,6 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func startClient(c *client.Client) tea.Cmd {
-	return func() tea.Msg {
-		c.Run()
-		return nil
-	}
-}
-
 func waitEvent(ch <-chan client.Event) tea.Cmd {
 	return func() tea.Msg {
 		ev, ok := <-ch
