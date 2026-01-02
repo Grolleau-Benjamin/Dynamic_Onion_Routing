@@ -9,5 +9,5 @@ const (
 
 type Event struct {
 	Type    EventType
-	Payload interface{}
+	Payload any
 }
