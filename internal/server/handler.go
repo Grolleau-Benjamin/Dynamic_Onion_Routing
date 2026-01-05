@@ -9,7 +9,11 @@ import (
 
 func (s *Server) handleConn(conn net.Conn) {
 	defer s.wg.Done()
-	defer conn.Close()
+	defer func() {
+		if err := conn.Close(); err != nil {
+			logger.Warnf("Error closing connection: %v", err)
+		}
+	}()
 	remoteAddr := conn.RemoteAddr().String()
 
 	if err := conn.SetDeadline(time.Now().Add(10 * time.Second)); err != nil {

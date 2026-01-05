@@ -29,8 +29,10 @@ It can be used either in headless CLI mode or in interactive TUI mode.
 	}
 )
 
-func Execute() error {
-	return rootCommand.Execute()
+func Execute() {
+	if err := rootCommand.Execute(); err != nil {
+		os.Exit(1)
+	}
 }
 
 func init() {

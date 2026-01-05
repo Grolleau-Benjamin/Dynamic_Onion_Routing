@@ -33,8 +33,10 @@ It listens for incoming packets and routes them across the network.
 	}
 )
 
-func Execute() error {
-	return rootCommand.Execute()
+func Execute() {
+	if err := rootCommand.Execute(); err != nil {
+		os.Exit(1)
+	}
 }
 
 func init() {
