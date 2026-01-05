@@ -3,11 +3,11 @@ package server
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net"
 	"sync"
 	"time"
 
+	"github.com/Grolleau-Benjamin/Dynamic_Onion_Routing/internal/logger"
 	"github.com/Grolleau-Benjamin/Dynamic_Onion_Routing/internal/protocol/identity"
 )
 
@@ -38,6 +38,8 @@ func New(addr, idDir string, port uint16) (*Server, error) {
 		return nil, err
 	}
 
+	logger.Debugf("New server listening on %s (%s).", ep.String(), ep.Network())
+
 	return &Server{
 		ln: ln,
 
@@ -49,7 +51,7 @@ func New(addr, idDir string, port uint16) (*Server, error) {
 }
 
 func (s *Server) Serve(ctx context.Context) error {
-	fmt.Println("Server just started")
+	logger.Infof("Server started.")
 
 	errCh := make(chan error, 1)
 	s.wg.Add(1)
@@ -103,5 +105,6 @@ func (s *Server) close() error {
 		}
 		s.wg.Wait()
 	})
+	logger.Infof("Server closed.")
 	return err
 }

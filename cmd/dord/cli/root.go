@@ -10,6 +10,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/Grolleau-Benjamin/Dynamic_Onion_Routing/internal/logger"
 	"github.com/Grolleau-Benjamin/Dynamic_Onion_Routing/internal/server"
 )
 
@@ -17,6 +18,8 @@ var (
 	addr  string
 	port  uint16
 	idDir string
+
+	logLevel string
 
 	rootCommand = &cobra.Command{
 		Use:   "dord",
@@ -57,22 +60,32 @@ func init() {
 		"~/.dor",
 		"Directory where identity material is stored",
 	)
+
+	rootCommand.Flags().StringVarP(
+		&logLevel,
+		"log-level",
+		"l",
+		"info",
+		"Log level (debug, info, warn, error, off)",
+	)
 }
 
 func Run(cmd *cobra.Command, args []string) {
+	lvl := logger.ParseLevel(logLevel)
+	logger.SetLevel(lvl)
+
 	if strings.HasPrefix(idDir, "~") {
 		home, err := os.UserHomeDir()
 		if err != nil {
-			cmd.PrintErrln("Cannot resolve home directory:", err)
-			os.Exit(1)
+			logger.Fatalf("Cannot resolve home directory: %v", err)
 		}
 		idDir = filepath.Join(home, idDir[1:])
 	}
+	logger.Infof("Initializing DORD (Level: %s)", logLevel)
 
 	s, err := server.New(addr, idDir, port)
 	if err != nil {
-		cmd.PrintErrln("Error initializing server:", err)
-		os.Exit(1)
+		logger.Fatalf("Error initializing server: %v", err)
 	}
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
@@ -82,4 +95,5 @@ func Run(cmd *cobra.Command, args []string) {
 		cmd.PrintErrln("Error running server:", err)
 		os.Exit(1)
 	}
+	logger.Infof("Sutdown complete.")
 }

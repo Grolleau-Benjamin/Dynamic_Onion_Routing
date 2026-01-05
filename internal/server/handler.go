@@ -1,20 +1,21 @@
 package server
 
 import (
-	"fmt"
 	"net"
 	"time"
+
+	"github.com/Grolleau-Benjamin/Dynamic_Onion_Routing/internal/logger"
 )
 
 func (s *Server) handleConn(conn net.Conn) {
 	defer s.wg.Done()
 	defer conn.Close()
+	remoteAddr := conn.RemoteAddr().String()
 
 	if err := conn.SetDeadline(time.Now().Add(10 * time.Second)); err != nil {
-		fmt.Printf("Failed to set deadline: %v\n", err)
+		logger.Warnf("Failed to set deadline for %s: %v", remoteAddr, err)
 		return
 	}
 
-	remoteAddr := conn.RemoteAddr().String()
-	fmt.Printf("[%s] Connection accepted\n", remoteAddr)
+	logger.Debugf("[%s] Connection accepted", remoteAddr)
 }
