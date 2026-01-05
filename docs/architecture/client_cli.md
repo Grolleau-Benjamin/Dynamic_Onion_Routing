@@ -98,7 +98,7 @@ flowchart TB
 
     RunCall --> CloseClient
     CloseClient -- "7. Close Chan" --> Channel
-    
+
     CloseClient --> Wait
 
     Channel -.-> Consumer

@@ -45,13 +45,13 @@ sequenceDiagram
     Core->>Chan: Push Event (Log)
     Cmd->>Chan: Read Event (Unblock)
     Chan-->>Cmd: Event Payload
-    
+
     Cmd-->>TEA: Return Msg (client.Event)
     deactivate Cmd
 
     TEA->>Update: Call Update(msg)
     Update->>Update: Append Log to State
-    
+
     Note right of Update: RECURSION START
     Update-->>TEA: Return Cmd: waitForEvent()
     TEA->>Cmd: Schedule waitForEvent()
@@ -64,7 +64,7 @@ sequenceDiagram
     Update->>Core: client.Close()
     Core->>Chan: close()
     deactivate Core
-    
+
     Update-->>TEA: Quit
     deactivate Cmd
 ```
@@ -83,7 +83,7 @@ flowchart TB
         Init(("Init()"))
         Update["Update()"]
         View["View()"]
-        
+
         subgraph Managed_Commands ["Runtime Managed Goroutines"]
             WaitCmd["Cmd: waitForEvent(ch)"]
         end

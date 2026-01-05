@@ -74,4 +74,3 @@ func (e Endpoint) Network() string {
 	}
 	return "tcp6"
 }
-
