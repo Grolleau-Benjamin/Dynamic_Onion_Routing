@@ -17,5 +17,7 @@ func (s *Server) handleConn(conn net.Conn) {
 		return
 	}
 
+	_, _ = conn.Write([]byte("ACK\r\n"))
+
 	logger.Debugf("[%s] Connection accepted", remoteAddr)
 }
