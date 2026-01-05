@@ -3,6 +3,7 @@ package stdout
 import (
 	"fmt"
 	"github.com/Grolleau-Benjamin/Dynamic_Onion_Routing/internal/client"
+	"github.com/Grolleau-Benjamin/Dynamic_Onion_Routing/internal/client/model"
 )
 
 type Sink struct {
@@ -19,6 +20,13 @@ func New(c *client.Client, ic client.InputConfig) *Sink {
 
 func (s *Sink) Start() error {
 	done := make(chan struct{})
+
+	msg, err := model.BuildFromInputConfig(s.config)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(msg)
 
 	go func() {
 		for ev := range s.client.Events() {
