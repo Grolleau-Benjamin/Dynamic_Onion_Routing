@@ -1,0 +1,30 @@
+name: Lint & Quality
+
+on:
+  push:
+    branches: [ "main" ]
+    paths: [ "**.go", "go.mod", ".golangci.yml" ]
+  pull_request:
+    branches: [ "main" ]
+    paths: [ "**.go", "go.mod", ".golangci.yml" ]
+
+jobs:
+  golangci:
+    name: GolangCI-Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go (from go.mod)
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          check-latest: true
+          cache: true
+
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v7
+        with:
+          version: v2.5.0
+          args: --timeout=5m
