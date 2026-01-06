@@ -19,3 +19,8 @@ func (r Relay) String() string {
 		r.PubKey[:4],
 	)
 }
+
+func (r *Relay) HydrateIdentity(uuid [16]byte, pubKey [32]byte) {
+	r.UUID = uuid
+	r.PubKey = pubKey
+}
