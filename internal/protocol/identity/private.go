@@ -114,8 +114,10 @@ func LoadPrivateIdentity(dir string) (*PrivateIdentity, error) {
 
 	if fileExists(store.uuidPath) {
 		pi.UUID, err = loadUUID(store.uuidPath)
+		logger.Debugf("Identity loaded (UUID: %X...)", pi.UUID[:4])
 	} else {
 		pi.UUID, err = generateUUID(store.uuidPath)
+		logger.Infof("New identity generated (UUID: %X...)", pi.UUID[:4])
 	}
 	if err != nil {
 		return nil, fmt.Errorf("UUID error: %w", err)
@@ -123,8 +125,10 @@ func LoadPrivateIdentity(dir string) (*PrivateIdentity, error) {
 
 	if fileExists(store.privPath) {
 		pi.PrivKey, err = loadKey32(store.privPath)
+		logger.Debugf("Private key loaded from disk")
 	} else {
 		pi.PrivKey, err = generatePrivKey(store.privPath)
+		logger.Infof("New private key generated")
 	}
 	if err != nil {
 		return nil, fmt.Errorf("private key error: %w", err)
