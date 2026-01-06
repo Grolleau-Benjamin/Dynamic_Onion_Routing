@@ -87,21 +87,6 @@ func generatePrivKey(path string) ([32]byte, error) {
 	return priv, nil
 }
 
-func generatePubKey(path string, priv [32]byte) ([32]byte, error) {
-	pubSlice, err := curve25519.X25519(priv[:], curve25519.Basepoint)
-	if err != nil {
-		return [32]byte{}, err
-	}
-
-	var pub [32]byte
-	copy(pub[:], pubSlice)
-
-	if err := os.WriteFile(path, pub[:], 0644); err != nil {
-		return [32]byte{}, err
-	}
-	return pub, nil
-}
-
 func LoadPrivateIdentity(dir string) (*PrivateIdentity, error) {
 	store := newIdentityStore(dir)
 	pi := &PrivateIdentity{}
