@@ -106,7 +106,7 @@ func LoadPrivateIdentity(dir string) (*PrivateIdentity, error) {
 	pi := &PrivateIdentity{}
 
 	if err := os.MkdirAll(store.dir, 0700); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create identity dir: %w", err)
 	}
 
 	var err error
@@ -117,7 +117,7 @@ func LoadPrivateIdentity(dir string) (*PrivateIdentity, error) {
 		pi.UUID, err = generateUUID(store.uuidPath)
 	}
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("UUID error: %w", err)
 	}
 
 	if fileExists(store.privPath) {
@@ -126,7 +126,7 @@ func LoadPrivateIdentity(dir string) (*PrivateIdentity, error) {
 		pi.PrivKey, err = generatePrivKey(store.privPath)
 	}
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("private key error: %w", err)
 	}
 
 	if fileExists(store.pubPath) {
