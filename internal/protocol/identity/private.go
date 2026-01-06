@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/Grolleau-Benjamin/Dynamic_Onion_Routing/internal/logger"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/curve25519"
 )
@@ -129,13 +130,36 @@ func LoadPrivateIdentity(dir string) (*PrivateIdentity, error) {
 		return nil, fmt.Errorf("private key error: %w", err)
 	}
 
-	if fileExists(store.pubPath) {
-		pi.PubKey, err = loadKey32(store.pubPath)
-	} else {
-		pi.PubKey, err = generatePubKey(store.pubPath, pi.PrivKey)
-	}
+	expectedPubSlice, err := curve25519.X25519(pi.PrivKey[:], curve25519.Basepoint)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to derive public key: %w", err)
+	}
+	var expectedPub [32]byte
+	copy(expectedPub[:], expectedPubSlice)
+
+	if fileExists(store.pubPath) {
+		loadedPub, err := loadKey32(store.pubPath)
+		if err != nil {
+			return nil, fmt.Errorf("public key load error: %w", err)
+		}
+
+		if loadedPub != expectedPub {
+			logger.Warnf("Public key mismatch detected on disk. Overwriting %s", store.pubPath)
+			if err := os.WriteFile(store.pubPath, expectedPub[:], 0644); err != nil {
+				return nil, fmt.Errorf("failed to fix public key file: %w", err)
+			}
+			pi.PubKey = expectedPub
+			logger.Infof("Public key successfully repaired")
+		} else {
+			pi.PubKey = loadedPub
+			logger.Debugf("Public key verified and loaded (PK: %X...)", pi.PubKey[:6])
+		}
+	} else {
+		if err := os.WriteFile(store.pubPath, expectedPub[:], 0644); err != nil {
+			return nil, fmt.Errorf("failed to save derived public key: %w", err)
+		}
+		pi.PubKey = expectedPub
+		logger.Infof("Public key derived and saved (PK: %X...)", pi.PubKey[:6])
 	}
 
 	return pi, nil
