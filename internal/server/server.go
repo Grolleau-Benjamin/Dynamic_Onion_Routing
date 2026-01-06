@@ -15,7 +15,7 @@ type Server struct {
 	ln net.Listener
 
 	ep identity.Endpoint
-	pi *identity.PrivateIdentity
+	Pi *identity.PrivateIdentity
 
 	wg       sync.WaitGroup
 	stop     chan struct{}
@@ -44,7 +44,7 @@ func New(addr, idDir string, port uint16) (*Server, error) {
 		ln: ln,
 
 		ep: ep,
-		pi: pi,
+		Pi: pi,
 
 		stop: make(chan struct{}),
 	}, nil
@@ -54,10 +54,8 @@ func (s *Server) Serve(ctx context.Context) error {
 	logger.Infof("Server started.")
 
 	errCh := make(chan error, 1)
-	s.wg.Add(1)
 
-	go func() {
-		defer s.wg.Done()
+	s.wg.Go(func() {
 		for {
 			conn, err := s.ln.Accept()
 			if err != nil {
@@ -78,10 +76,11 @@ func (s *Server) Serve(ctx context.Context) error {
 				}
 			}
 
-			s.wg.Add(1)
-			go s.handleConn(conn)
+			s.wg.Go(func() {
+				s.handleConn(conn)
+			})
 		}
-	}()
+	})
 
 	select {
 	// Context cancelled via Signal (Ctrl+C)
