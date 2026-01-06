@@ -2,6 +2,7 @@ package stdout
 
 import (
 	"fmt"
+
 	"github.com/Grolleau-Benjamin/Dynamic_Onion_Routing/internal/client"
 	"github.com/Grolleau-Benjamin/Dynamic_Onion_Routing/internal/client/model"
 )
@@ -40,7 +41,20 @@ func (s *Sink) Start() error {
 		close(done)
 	}()
 
-	s.client.Simulate()
+	for gi := range msg.Path {
+		group := &msg.Path[gi]
+
+		// TODO: group.GenerateCryptoMaterial()
+
+		for ri := range group.Group.Relays {
+			relay := &group.Group.Relays[ri]
+
+			if err := s.client.RetrieveRelayIdentity(relay); err != nil {
+				return err
+			}
+		}
+	}
+
 	s.client.Close()
 	<-done
 	return nil

@@ -26,6 +26,8 @@ func (m *Model) Start() error {
 }
 
 func (m *Model) Init() tea.Cmd {
-	m.state.Client.Simulate()
+	// ep, _ := identity.ParseEpFromString("[::1]:62503")
+	// m.state.Client.RetrieveIdentity(ep)
+
 	return waitForEvent(m.state.Client.Events())
 }
