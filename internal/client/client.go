@@ -1,6 +1,8 @@
 package client
 
-import "context"
+import (
+	"context"
+)
 
 type Client struct {
 	events chan Event
@@ -19,13 +21,6 @@ func New() *Client {
 
 func (c *Client) Events() <-chan Event {
 	return c.events
-}
-
-// TODO: delete this later when no more usefull
-func (c *Client) Simulate() {
-	c.events <- Event{Type: EvLog, Payload: "[Simulating] Connecting..."}
-	c.events <- Event{Type: EvLog, Payload: "[Simulating] Simulating data..."}
-	c.events <- Event{Type: EvLog, Payload: "[Simulating] Done."}
 }
 
 func (c Client) Close() {
