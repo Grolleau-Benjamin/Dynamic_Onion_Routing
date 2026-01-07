@@ -19,6 +19,13 @@ func New() *Client {
 	}
 }
 
+func (c *Client) EmitLog(payload string) {
+	c.events <- Event{
+		Type:    EvLog,
+		Payload: payload,
+	}
+}
+
 func (c *Client) Events() <-chan Event {
 	return c.events
 }

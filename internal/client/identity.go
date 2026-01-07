@@ -39,15 +39,12 @@ func (c *Client) RetrieveRelayIdentity(r *identity.Relay) error {
 
 	r.HydrateIdentity(id.Ruuid, id.PublicKey)
 
-	c.events <- Event{
-		Type: EvLog,
-		Payload: fmt.Sprintf(
-			"identity received from %s => uuid=%X pub=%X",
-			r.Ep.String(),
-			id.Ruuid[:4],
-			id.PublicKey[:4],
-		),
-	}
+	c.EmitLog(fmt.Sprintf(
+		"identity received from %s => uuid=%X pub=%X",
+		r.Ep.String(),
+		id.Ruuid[:4],
+		id.PublicKey[:4],
+	))
 
 	return nil
 }
