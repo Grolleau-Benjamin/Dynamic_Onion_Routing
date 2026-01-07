@@ -81,6 +81,10 @@ func generatePrivKey(path string) ([32]byte, error) {
 		return [32]byte{}, err
 	}
 
+	priv[0] &= 248
+	priv[31] &= 127
+	priv[31] |= 64
+
 	if err := os.WriteFile(path, priv[:], 0600); err != nil {
 		return [32]byte{}, err
 	}
