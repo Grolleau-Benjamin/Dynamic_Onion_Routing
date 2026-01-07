@@ -1,0 +1,6 @@
+# Temps files
+logs/
+tmp/
+
+# Binary files
+bin/
