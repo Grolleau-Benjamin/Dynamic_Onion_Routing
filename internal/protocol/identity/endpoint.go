@@ -1,6 +1,7 @@
 package identity
 
 import (
+	"encoding/binary"
 	"fmt"
 	"net"
 	"strconv"
@@ -9,6 +10,43 @@ import (
 type Endpoint struct {
 	IP   net.IP
 	Port uint16
+}
+
+const (
+	EndpointIPv4 = 0x04
+	EndpointIPv6 = 0x06
+)
+
+func (e Endpoint) Bytes() ([]byte, error) {
+	var ipBytes []byte
+	var ipType byte
+
+	if ip4 := e.IP.To4(); ip4 != nil {
+		ipType = EndpointIPv4
+		ipBytes = ip4
+	} else if ip6 := e.IP.To16(); ip6 != nil {
+		ipType = EndpointIPv6
+		ipBytes = ip6
+	} else {
+		return nil, fmt.Errorf("invalid IP address: %v", e.IP)
+	}
+
+	out := make([]byte, 1+2+len(ipBytes))
+	out[0] = ipType
+	binary.BigEndian.PutUint16(out[1:3], e.Port)
+	copy(out[3:], ipBytes)
+
+	return out, nil
+}
+
+func (e Endpoint) BytesLen() int {
+	if e.IP.To4() != nil {
+		return 1 + 2 + 4 // Type + Port + len(ip)
+	}
+	if e.IP.To16() != nil {
+		return 1 + 2 + 16
+	}
+	return 0
 }
 
 func NewEndpoint(ipStr string, port uint16) (Endpoint, error) {
