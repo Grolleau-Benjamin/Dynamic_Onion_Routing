@@ -56,6 +56,8 @@ func (s *Sink) Start() error {
 				return err
 			}
 		}
+
+		// ol := model.BuildFromInputConfig(ic client.InputConfig)
 	}
 
 	s.client.Close()
