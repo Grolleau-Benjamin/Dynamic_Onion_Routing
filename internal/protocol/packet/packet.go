@@ -5,6 +5,8 @@ import "io"
 const (
 	TypeGetIdentityRequest  uint8 = 0x00
 	TypeGetIdentityResponse uint8 = 0x01
+
+	TypeOnionPacket uint8 = 0x10
 )
 
 type Packet interface {
