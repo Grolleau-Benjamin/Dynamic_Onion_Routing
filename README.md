@@ -17,3 +17,16 @@ go run cmd/dorc/main.go \
   --payload "Some dada" \
   --tui # Optional -> Enable Bubbletea TUI
 ```
+
+## Plugins
+In addition to the demonstrator, this protocol also provides a Wireshark Lua plugin to observe DOR protocol exchanges.
+
+Copy the plugin to your Wireshark plugins directory:
+
+```shell
+# Linux / Macos sample
+cp ./tools/wireshark/dor.lua ~/.config/wireshark/plugins/
+```
+
+> [!NOTE]
+> The plugin does not decrypt ciphertext - it only displays the protocol structure visible on the network.
