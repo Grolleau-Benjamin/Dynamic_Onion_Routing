@@ -2,32 +2,13 @@ package client
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/Grolleau-Benjamin/Dynamic_Onion_Routing/internal/protocol/identity"
 	"github.com/Grolleau-Benjamin/Dynamic_Onion_Routing/internal/protocol/packet"
 )
 
 func (c *Client) RetrieveRelayIdentity(r *identity.Relay) error {
-	conn, err := dialEndpoint(r.Ep, 5*time.Second)
-	if err != nil {
-		return err
-	}
-	defer func() {
-		if err = conn.Close(); err != nil {
-			c.events <- Event{Type: EvErr, Payload: err.Error()}
-		}
-	}()
-
-	if err = conn.SetDeadline(time.Now().Add(10 * time.Second)); err != nil {
-		return err
-	}
-
-	if err = packet.WritePacket(conn, &packet.GetIdentityRequest{}); err != nil {
-		return err
-	}
-
-	resp, err := packet.ReadPacket(conn)
+	resp, err := c.tx.Request(r.Ep, &packet.GetIdentityRequest{})
 	if err != nil {
 		return err
 	}
