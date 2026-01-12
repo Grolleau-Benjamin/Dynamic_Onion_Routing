@@ -72,7 +72,7 @@ func TestCryptoGroup_String(t *testing.T) {
 	}
 }
 
-func TestCryptoGroup_GenerateCryptoMateriel(t *testing.T) {
+func TestCryptoGroup_GenerateCryptoMaterial(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
@@ -97,9 +97,9 @@ func TestCryptoGroup_GenerateCryptoMateriel(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			err := tt.group.GenerateCryptoMateriel()
+			err := tt.group.GenerateCryptoMaterial()
 			if (err != nil) && !tt.wantErr {
-				t.Fatalf("GenerateCryptoMateriel() Unexpected error = %v, wantErr %v", err, tt.wantErr)
+				t.Fatalf("GenerateCryptoMaterial() Unexpected error = %v, wantErr %v", err, tt.wantErr)
 			}
 
 			if !tt.wantErr {
