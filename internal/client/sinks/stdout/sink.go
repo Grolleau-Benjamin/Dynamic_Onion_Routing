@@ -44,7 +44,7 @@ func (s *Sink) Start() error {
 	for gi := range msg.Path {
 		group := &msg.Path[gi]
 
-		if err := group.GenerateCryptoMateriel(); err != nil {
+		if err := group.GenerateCryptoMaterial(); err != nil {
 			return err
 		}
 		s.client.EmitLog(fmt.Sprintf("crypto material generated for %s", group))

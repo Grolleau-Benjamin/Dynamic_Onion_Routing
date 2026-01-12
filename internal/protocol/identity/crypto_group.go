@@ -24,7 +24,7 @@ func (g CryptoGroup) String() string {
 	)
 }
 
-func (g *CryptoGroup) GenerateCryptoMateriel() error {
+func (g *CryptoGroup) GenerateCryptoMaterial() error {
 	if _, err := rand.Read(g.CipherKey[:]); err != nil {
 		return fmt.Errorf("cipher key generation failed: %w", err)
 	}
