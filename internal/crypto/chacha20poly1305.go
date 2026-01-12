@@ -2,6 +2,10 @@ package crypto
 
 import "golang.org/x/crypto/chacha20poly1305"
 
+const (
+	Poly1305TagSize = 16
+)
+
 func ChachaEncrypt(
 	key [32]byte,
 	nonce [12]byte,
