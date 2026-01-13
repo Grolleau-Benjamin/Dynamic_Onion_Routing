@@ -17,6 +17,7 @@ type HandlerFunc func(
 
 var handlerRegistry = map[uint8]HandlerFunc{
 	packet.TypeGetIdentityRequest: handleGetIdentity,
+	packet.TypeOnionPacket:        handleOnionPacket,
 }
 
 func (s *Server) handleConn(conn net.Conn) {
