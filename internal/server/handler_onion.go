@@ -8,6 +8,7 @@ import (
 	"github.com/Grolleau-Benjamin/Dynamic_Onion_Routing/internal/logger"
 	"github.com/Grolleau-Benjamin/Dynamic_Onion_Routing/internal/protocol/onion"
 	"github.com/Grolleau-Benjamin/Dynamic_Onion_Routing/internal/protocol/packet"
+	"github.com/Grolleau-Benjamin/Dynamic_Onion_Routing/internal/protocol/transport"
 	"golang.org/x/crypto/curve25519"
 )
 
@@ -122,5 +123,42 @@ func handleOnionPacket(
 	for i, nh := range olc.NextHops {
 		logger.Debugf("[%s] NextHop[%d]: %s:%d",
 			conn.RemoteAddr(), i, nh.IP.String(), nh.Port)
+	}
+
+	if olc.LastServer {
+		// TODO: handler this later
+		logger.Infof("[%s] Final destination reached! Processing payload (%d bytes)...", conn.RemoteAddr(), len(olc.Payload))
+		return
+	}
+
+	if len(olc.NextHops) == 0 {
+		logger.Warnf("[%s] Relay node but no next hop defined!", conn.RemoteAddr())
+		return
+	}
+
+	nextLayer := &onion.OnionLayer{}
+	err = nextLayer.Parse(olc.Payload)
+	if err != nil {
+		logger.Warnf("[%s] Decrypted payload is not a valid OnionLayer: %v", conn.RemoteAddr(), err)
+		return
+	}
+
+	nextHopBytes, err := nextLayer.BytesPadded()
+	if err != nil {
+		logger.Warnf("[%s] Failed to pad next layer: %v", conn.RemoteAddr(), err)
+		return
+	}
+
+	var outPkt packet.OnionPacket
+	copy(outPkt.Data[:], nextHopBytes)
+	trans := transport.NewTransport()
+
+	for _, nh := range olc.NextHops {
+		if err := trans.Send(nh, &outPkt); err != nil {
+			logger.Warnf("[%s] Failed to relay packet to %s: %v", conn.RemoteAddr(), nh.String(), err)
+			continue
+		}
+		logger.Debugf("[%s] Packet successfully relayed to %s", conn.RemoteAddr(), nh.String())
+		return
 	}
 }
