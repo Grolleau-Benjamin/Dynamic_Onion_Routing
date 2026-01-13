@@ -4,13 +4,26 @@ set -euo pipefail
 LOGDIR="logs"
 BINDIR="bin"
 BINARY_NAME="$BINDIR/dord"
-
 mkdir -p "$LOGDIR" "$BINDIR"
 
 USE_CONSOLE=false
 NUM_SERVERS=5
 START_PORT=62503
 GO_ARGS=""
+SERVER_ARGS=""
+
+function help {
+  echo "Usage: $0 [OPTIONS]"
+  echo ""
+  echo "Options:"
+  echo "  --console, -c           Display logs in console (colored)"
+  echo "  --num-servers, -n N     Number of servers to start (default: 5)"
+  echo "  --start-port, -p PORT   Starting port number (default: 62503)"
+  echo "  --go-args ARGS          Additional Go build arguments"
+  echo "  --server-args ARGS      Additional server runtime arguments (e.g., '--log-level debug')"
+  echo "  --help, -h              Show this help message"
+  exit 0
+}
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -30,6 +43,10 @@ while [[ $# -gt 0 ]]; do
       GO_ARGS="$2"
       shift 2
       ;;
+    --server-args)
+      SERVER_ARGS="$2"
+      shift 2
+      ;;
     --help|-h)
       help
       ;;
@@ -40,18 +57,6 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-function help {
-  echo "Usage: $0 [OPTIONS]"
-  echo ""
-  echo "Options:"
-  echo "  --console, -c           Display logs in console (colored)"
-  echo "  --num-servers, -n N     Number of servers to start (default: 5)"
-  echo "  --start-port, -p PORT   Starting port number (default: 62503)"
-  echo "  --go-args ARGS          Additional Go arguments"
-  echo "  --help, -h              Show this help message"
-  exit 0
-}
-
 function cleanup {
   echo ""
   echo "[CLEANUP] Stopping DOR servers..."
@@ -59,6 +64,7 @@ function cleanup {
   echo "[CLEANUP] Done."
   exit 0
 }
+
 trap cleanup EXIT INT TERM
 
 echo "[BUILD] Compiling dord to $BINARY_NAME..."
@@ -79,9 +85,9 @@ for i in $(seq 1 $NUM_SERVERS); do
   DIR="/tmp/dor_id/s_$i"
   PORT=$((START_PORT + i - 1))
   mkdir -p "$DIR"
-
   COLOR="${COLORS[$(( (i-1) % ${#COLORS[@]} ))]}"
-  CMD="$BINARY_NAME --id-dir=$DIR --port=$PORT"
+
+  CMD="$BINARY_NAME --id-dir=$DIR --port=$PORT $SERVER_ARGS"
 
   if [ "$USE_CONSOLE" = true ]; then
     echo -e "${COLOR}[START] Server on port $PORT${RESET}"
