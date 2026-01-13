@@ -132,3 +132,59 @@ func (ol *OnionLayer) BytesPadded() ([]byte, error) {
 
 	return out, nil
 }
+
+func (ol *OnionLayer) Parse(data []byte) error {
+	if len(data) < FixedHeaderSize {
+		return fmt.Errorf("data too short: need at least %d bytes for header, got %d",
+			FixedHeaderSize, len(data))
+	}
+
+	offset := 0
+
+	copy(ol.EPK[:], data[offset:offset+32])
+	offset += 32
+
+	for i := range MaxWrappedKey {
+		copy(ol.WrappedKeys[i].Nonce[:], data[offset:offset+12])
+		offset += 12
+
+		copy(ol.WrappedKeys[i].CipherText[:], data[offset:offset+64])
+		offset += 64
+	}
+
+	ol.Flags = data[offset]
+	offset++
+
+	copy(ol.PayloadNonce[:], data[offset:offset+12])
+	offset += 12
+
+	ol.CipherTextLenXor = binary.BigEndian.Uint16(data[offset : offset+2])
+	offset += 2
+
+	ol.CipherText = make([]byte, len(data)-offset)
+	copy(ol.CipherText, data[offset:])
+
+	return nil
+}
+
+func (ol *OnionLayer) CipherTextLen(cipherKey [32]byte) (int, error) {
+	mask, err := CipherTextLenMask16(cipherKey, ol.PayloadNonce)
+	if err != nil {
+		return 0, err
+	}
+	realLen := ol.CipherTextLenXor ^ mask
+	return int(realLen), nil
+}
+
+func (ol *OnionLayer) TrimCipherText(cipherKey [32]byte) error {
+	realLen, err := ol.CipherTextLen(cipherKey)
+	if err != nil {
+		return err
+	}
+	if realLen > len(ol.CipherText) {
+		return fmt.Errorf("invalid cipher text length: %d exceeds available data %d",
+			realLen, len(ol.CipherText))
+	}
+	ol.CipherText = ol.CipherText[:realLen]
+	return nil
+}
