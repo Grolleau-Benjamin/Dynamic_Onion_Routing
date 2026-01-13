@@ -45,6 +45,14 @@ func (s *Server) handleConn(conn net.Conn) {
 			return
 		}
 
-		h(pkt, conn, s)
+		go func(p packet.Packet) {
+			defer func() {
+				if r := recover(); r != nil {
+					logger.Errorf("[%s] PANIC in handler: %v", remote, r)
+				}
+			}()
+
+			h(p, conn, s)
+		}(pkt)
 	}
 }
