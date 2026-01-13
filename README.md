@@ -30,3 +30,6 @@ cp ./tools/wireshark/dor.lua ~/.config/wireshark/plugins/
 
 > [!NOTE]
 > The plugin does not decrypt ciphertext - it only displays the protocol structure visible on the network.
+
+## Documentation
+- [Onion Packet - Average Size Calculation](./docs/OnionPacket_AverageSizeCalculation.md)
