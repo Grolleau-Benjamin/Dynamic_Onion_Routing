@@ -4,7 +4,6 @@ import (
 	"errors"
 	"io"
 	"net"
-	"time"
 
 	"github.com/Grolleau-Benjamin/Dynamic_Onion_Routing/internal/logger"
 	"github.com/Grolleau-Benjamin/Dynamic_Onion_Routing/internal/protocol/packet"
@@ -12,8 +11,9 @@ import (
 
 type HandlerFunc func(
 	p packet.Packet,
+	conn net.Conn,
 	s *Server,
-) (packet.Packet, error)
+)
 
 var handlerRegistry = map[uint8]HandlerFunc{
 	packet.TypeGetIdentityRequest: handleGetIdentity,
@@ -27,23 +27,12 @@ func (s *Server) handleConn(conn net.Conn) {
 	}()
 
 	remote := conn.RemoteAddr().String()
-	logger.Debugf("[%s] connection accepted", remote)
 
 	for {
-		if err := conn.SetReadDeadline(time.Now().Add(30 * time.Second)); err != nil {
-			logger.Warnf("[%s] failed to set deadline: %v", remote, err)
-			return
-		}
-
 		pkt, err := packet.ReadPacket(conn)
 		if err != nil {
 			if errors.Is(err, io.EOF) {
-				logger.Debugf("[%s] connection closed by peer", remote)
-				return
-			}
-			if errors.Is(err, io.ErrUnexpectedEOF) {
-				logger.Warnf("[%s] truncated packet", remote)
-				return
+				return // remote closed the connection
 			}
 			logger.Warnf("[%s] read packet failed: %v", remote, err)
 			return
@@ -55,17 +44,6 @@ func (s *Server) handleConn(conn net.Conn) {
 			return
 		}
 
-		resp, err := h(pkt, s)
-		if err != nil {
-			logger.Warnf("[%s] handler error: %v", remote, err)
-			return
-		}
-
-		if resp != nil {
-			if err := packet.WritePacket(conn, resp); err != nil {
-				logger.Warnf("[%s] write response failed: %v", remote, err)
-				return
-			}
-		}
+		h(pkt, conn, s)
 	}
 }
