@@ -13,7 +13,7 @@ type Relay struct {
 
 func (r Relay) String() string {
 	return fmt.Sprintf(
-		"{ep=%s uuid=%x pub=%x}",
+		"{ep=%s uuid=%X pub=%X}",
 		r.Ep,
 		r.UUID[:4],
 		r.PubKey[:4],

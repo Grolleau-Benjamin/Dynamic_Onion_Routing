@@ -7,3 +7,6 @@ bin/
 
 # macos
 **/.DS_Store
+
+# Go coverage files
+*.out
