@@ -4,6 +4,8 @@ A Go implementation of a dynamic onion routing protocol for anonymous network co
 > [!WARNING]
 > This is a research/educational implementation. For production anonymity needs, use established solutions like Tor.
 
+![Screen](./docs/img/demo.png)
+
 ## Features
 - Multi-layer Onion Encryption: Each message is encrypted in multiple layers, with each relay peeling off one layer
 - Dynamic Path Selection: Flexible routing through multiple endpoint in relay groups
@@ -42,7 +44,7 @@ Basic Usage (CLI mode)
 go run cmd/dorc/main.go \
   --dest "[::1]:8080" \
   --onion-path "[::1]:62503,127.0.0.1:62504|[::1]:62505" \
-  --payload "Some dada"
+  --payload "Some data"
 ```
 
 > Note: use `-h` to have information about available flags. This client sample also needs the three servers to be started.
