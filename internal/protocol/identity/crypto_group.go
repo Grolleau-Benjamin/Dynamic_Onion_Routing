@@ -17,7 +17,7 @@ type CryptoGroup struct {
 
 func (g CryptoGroup) String() string {
 	return fmt.Sprintf(
-		"{group=%s cipher=%x... epk=%x...}",
+		"{group=%s cipher=%X... epk=%X...}",
 		g.Group,
 		g.CipherKey[:2],
 		g.EPK[:2],
