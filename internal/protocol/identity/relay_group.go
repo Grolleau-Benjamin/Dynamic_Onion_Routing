@@ -5,6 +5,11 @@ import (
 	"strings"
 )
 
+const (
+	MaxJump int = 5 // todo: centralize with internal/protocol/onion/builder.go
+	MaxNode int = 3 // todo: centralisze with MaxWrappedKey
+)
+
 type RelayGroup struct {
 	Relays []Relay
 }
@@ -29,6 +34,10 @@ func ParseRelayPath(raw string) ([]RelayGroup, error) {
 	}
 
 	groupStrs := strings.Split(raw, "|")
+	if len(groupStrs) > MaxJump {
+		return nil, fmt.Errorf("too many jump. Max: %d", MaxJump)
+	}
+
 	groups := make([]RelayGroup, 0, len(groupStrs))
 
 	for gi, groupStr := range groupStrs {
@@ -38,6 +47,9 @@ func ParseRelayPath(raw string) ([]RelayGroup, error) {
 		}
 
 		relayStrs := strings.Split(groupStr, ",")
+		if len(relayStrs) > MaxNode {
+			return nil, fmt.Errorf("too many node at group index %d. Max: %d", gi, MaxNode)
+		}
 		relays := make([]Relay, 0, len(relayStrs))
 
 		for ri, relayStr := range relayStrs {
