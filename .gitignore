@@ -10,3 +10,6 @@ bin/
 
 # Go coverage files
 *.out
+
+# Drawio backup files
+**/*.bkp

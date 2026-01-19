@@ -1,0 +1,70 @@
+direction: down
+
+input-data: {
+  direction: right
+  payload: "payload\nstring"
+  onionPath: "onionPath\nstring"
+  dest: "dest\nstring"
+}
+
+cryptoGroups: "[]identity.CryptoGroup"
+input-data.onionPath -> cryptoGroups: "Parse"
+
+cg: {
+  shape: class
+  label: "cg = cryptoGroup[i]"
+  Group: RelayGroup
+  CipherKey: \[32\]byte
+  ESK: \[32\]byte
+  EPK: \[32\]byte
+}
+
+cryptoGroups -> cg: "iterate\n{i, cg := range cryptoGroups}"
+
+cg-material: {
+  label: "cg.GenerateCryptoMaterial()"
+  direction: down
+
+  gen: {
+    shape: hexagon
+    label: "generateCryptoMaterial"
+  }
+
+  esk: "ESK\n(32B)"
+  cipherKey: "CipherKey\n(32B)"
+  epk: "EPK\n(32B)"
+
+  gen -> esk: "Generate random"
+  gen -> cipherKey: "Generate random"
+  esk -> epk: "Derive (X25519)"
+}
+
+cg -> cg-material: call
+cg-material -> cg: "update"
+
+RelayGroup: {
+  shape: class
+  Relays: \[\]Relay
+}
+
+cg -> RelayGroup: "access\nGroup.Relays"
+
+relay: {
+  shape: class
+  label: "r = relays[j]"
+  Ep: Endpoint
+  UUID: \[16\]byte
+  PubKey: \[32\]byte
+}
+
+RelayGroup -> relay: "iterate\n{j, r := range Relays}"
+
+server: {
+  label: "Remote Server"
+  shape: cloud
+}
+
+relay -> server: "Identity Request to Ep"
+server -> relay: "Identity Response\n{UUID (16B), PubKey (32B)}"
+relay -> RelayGroup: "update relay[j]"
+RelayGroup -> cg: "all relays updated"
