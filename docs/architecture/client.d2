@@ -1,0 +1,89 @@
+# ############################################################## # Classes ################################################################ 
+LoopPathGroup: {
+  shape: diamond
+  label: Loop\: \nPath Groups
+}
+LoopRelay: {
+  shape: diamond
+  label: Loop\: \nRelays
+}
+RelayGroup: {
+  shape: class
+  +Relays: \[\]Relay
+  +ParseRelayPath(raw string) (\[\]RelayGroup, error)
+}
+Relay: {
+  shape: class
+  +Ep: Endpoint
+  +UUID: \[32\]Byte
+  +PubKey: \[32\]Byte
+
+  +String(): string
+  +HydrateIdentity(uuid \[16\]Byte, pubKey \[32\]Byte)
+}
+Message: {
+  shape: class
+  +Dest: Endpoint
+  +Path: \[\]CryptoGroup
+  +Payload: \[\]Byte
+  +String(): string
+  +BuildFromInputConfig(ic InputConfig): (Message, error)
+}
+CryptoGroup: {
+  shape: class
+  +Group: RelayGroup
+  +CipherKey: \[32\]Byte
+  +EPK: \[32\]Byte
+  +ESK: \[32\]Byte
+  +GenerateCryptoMaterial(): error
+}
+InputConfig: {
+  shape: class
+  +OnionPath: string
+  +Dest: string
+  +Payload: string
+  +IsComplete(): bool
+}
+Client: {
+  shape: class
+  +events: chan Event
+  +ctx: context.Context
+  +cancel: context.CancelFunc
+  +New(): *Client
+  +EmitLog(payload string)
+  +Events(): <-chan Event
+  +Close()
+}
+Sinks: {
+  StdoutSinker: Stdout sinker {
+    shape: class
+    +Start(): error
+  }
+  TuiSinker: Tui Sinker {
+    shape: class
+    +Start(): error
+  }
+}
+Main: {
+  shape: circle
+  label: "Main"
+}
+
+# ############################################################### # Relations ################################################################ 
+Main -> InputConfig: Run
+InputConfig -> Sinks.StdoutSinker: New
+InputConfig -> Sinks.TuiSinker: New
+Sinks.TuiSinker -> Client: Start
+Sinks.StdoutSinker -> Client: Start
+CryptoGroup -> Message
+Relay -> RelayGroup
+CryptoGroup -> RelayGroup
+RelayGroup -> CryptoGroup
+Sinks.StdoutSinker -> Message
+Message -> LoopPathGroup
+LoopPathGroup -> CryptoGroup
+CryptoGroup -> LoopRelay
+LoopRelay -> Relay
+Relay -> LoopRelay
+Relay -> void: Server Request
+void.style.opacity: 0
