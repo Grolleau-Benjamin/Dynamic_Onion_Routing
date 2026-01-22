@@ -40,6 +40,24 @@ func Test<StructName>_<FuncName>(t *testing.T) {
 }
 ```
 
+## Adding some Benchmark for important informations
+```go
+package server
+
+import (
+	"testing"
+)
+
+func Benchmark<func_Name>(b *testing.B) {
+  // setup
+
+	b.ResetTimer()
+	for b.Loop() {
+    // func call
+	}
+}
+```
+
 ## Running tests
 ```bash
 # Run all tests
@@ -59,4 +77,7 @@ go tool cover -func=coverage.out
 
 # Run with race detector
 go test -race ./...
+
+# Run Benchmark
+go test -bench=. -benchmem ./...
 ```
