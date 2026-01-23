@@ -16,8 +16,6 @@ import (
 )
 
 func TestServer_handleConn_EOF(t *testing.T) {
-	t.Parallel()
-
 	conn := testutil.NewMockConn([]byte{})
 	conn.ReadErr = io.EOF
 
@@ -30,8 +28,6 @@ func TestServer_handleConn_EOF(t *testing.T) {
 }
 
 func TestServer_handleConn_ReadError(t *testing.T) {
-	t.Parallel()
-
 	tests := []struct {
 		name    string
 		readErr error
@@ -52,8 +48,6 @@ func TestServer_handleConn_ReadError(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
 			conn := testutil.NewMockConn([]byte{})
 			conn.ReadErr = tt.readErr
 
@@ -68,8 +62,6 @@ func TestServer_handleConn_ReadError(t *testing.T) {
 }
 
 func TestServer_handleConn_CloseError(t *testing.T) {
-	t.Parallel()
-
 	conn := testutil.NewMockConn([]byte{})
 	conn.ReadErr = io.EOF
 	conn.CloseErr = errors.New("mock close error")
@@ -83,8 +75,6 @@ func TestServer_handleConn_CloseError(t *testing.T) {
 }
 
 func TestHandlerRegistry_AllTypesRegistered(t *testing.T) {
-	t.Parallel()
-
 	tests := []struct {
 		name       string
 		packetType uint8
@@ -109,8 +99,6 @@ func TestHandlerRegistry_AllTypesRegistered(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
 			_, exists := handlerRegistry[tt.packetType]
 			if exists != tt.wantExists {
 				t.Errorf("handlerRegistry[0x%02x] exists = %v, want %v",
@@ -121,8 +109,6 @@ func TestHandlerRegistry_AllTypesRegistered(t *testing.T) {
 }
 
 func TestHandlerRegistry_HandlersNotNil(t *testing.T) {
-	t.Parallel()
-
 	for typ, handler := range handlerRegistry {
 		t.Run("", func(t *testing.T) {
 			if handler == nil {
@@ -133,8 +119,6 @@ func TestHandlerRegistry_HandlersNotNil(t *testing.T) {
 }
 
 func TestServer_handleConn_UnknownPacket(t *testing.T) {
-	t.Parallel()
-
 	client, server := net.Pipe()
 	t.Cleanup(func() {
 		_ = client.Close()
@@ -160,8 +144,6 @@ func TestServer_handleConn_UnknownPacket(t *testing.T) {
 }
 
 func TestServer_handleConn_GetIdentityRequest(t *testing.T) {
-	t.Parallel()
-
 	testUUID := [16]byte{0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
 		0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10}
 	testPubKey := [32]byte{0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff, 0x11, 0x22,
@@ -186,11 +168,11 @@ func TestServer_handleConn_GetIdentityRequest(t *testing.T) {
 	<-done
 	time.Sleep(50 * time.Millisecond)
 
-	if conn.WriteBuf.Len() == 0 {
+	if conn.GetWrittenLen() == 0 {
 		t.Error("expected GetIdentityResponse to be written")
 	}
 
-	responseData := conn.WriteBuf.Bytes()
+	responseData := conn.GetWrittenBytes()
 
 	if len(responseData) < 3 {
 		t.Fatalf("response too short: %d bytes", len(responseData))
@@ -221,8 +203,6 @@ func TestServer_handleConn_GetIdentityRequest(t *testing.T) {
 }
 
 func TestServer_handleConn_OnionPacket(t *testing.T) {
-	t.Parallel()
-
 	s := &Server{
 		Pi: &identity.PrivateIdentity{
 			UUID:   [16]byte{0x01, 0x02, 0x03, 0x04},
@@ -252,8 +232,6 @@ func TestServer_handleConn_OnionPacket(t *testing.T) {
 }
 
 func TestServer_handleConn_HandlerExecution(t *testing.T) {
-	t.Parallel()
-
 	validPacketData := []byte{packet.TypeGetIdentityRequest, 0x00, 0x00}
 	conn := testutil.NewMockConn(validPacketData)
 
@@ -307,8 +285,6 @@ func TestServer_handleConn_PanicRecovery(t *testing.T) {
 }
 
 func TestServer_handleConn_MultiplePackets(t *testing.T) {
-	t.Parallel()
-
 	testUUID := [16]byte{0x01, 0x02, 0x03, 0x04}
 	testPubKey := [32]byte{0xaa, 0xbb, 0xcc, 0xdd}
 
@@ -337,15 +313,13 @@ func TestServer_handleConn_MultiplePackets(t *testing.T) {
 			t.Errorf("connection %d should be closed", i)
 		}
 
-		if conn.WriteBuf.Len() == 0 {
+		if conn.GetWrittenLen() == 0 {
 			t.Errorf("connection %d: expected response to be written", i)
 		}
 	}
 }
 
 func TestServer_handleConn_ConcurrentHandlers(t *testing.T) {
-	t.Parallel()
-
 	testUUID := [16]byte{0x01, 0x02, 0x03, 0x04}
 	testPubKey := [32]byte{0xaa, 0xbb, 0xcc, 0xdd}
 

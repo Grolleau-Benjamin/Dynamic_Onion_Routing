@@ -8,10 +8,10 @@ import (
 )
 
 type MockConn struct {
+	mu         sync.Mutex
 	ReadBuf    *bytes.Buffer
 	WriteBuf   *bytes.Buffer
 	closed     bool
-	closedMu   sync.Mutex
 	remoteAddr net.Addr
 	ReadErr    error
 	WriteErr   error
@@ -35,6 +35,12 @@ func NewMockConnWithAddr(data []byte, addr net.Addr) *MockConn {
 }
 
 func (m *MockConn) Read(b []byte) (n int, err error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	if m.closed {
+		return 0, net.ErrClosed
+	}
 	if m.ReadErr != nil {
 		return 0, m.ReadErr
 	}
@@ -42,6 +48,12 @@ func (m *MockConn) Read(b []byte) (n int, err error) {
 }
 
 func (m *MockConn) Write(b []byte) (n int, err error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	if m.closed {
+		return 0, net.ErrClosed
+	}
 	if m.WriteErr != nil {
 		return 0, m.WriteErr
 	}
@@ -49,16 +61,38 @@ func (m *MockConn) Write(b []byte) (n int, err error) {
 }
 
 func (m *MockConn) Close() error {
-	m.closedMu.Lock()
-	defer m.closedMu.Unlock()
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
 	m.closed = true
 	return m.CloseErr
 }
 
 func (m *MockConn) IsClosed() bool {
-	m.closedMu.Lock()
-	defer m.closedMu.Unlock()
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	return m.closed
+}
+
+func (m *MockConn) GetWrittenBytes() []byte {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	out := make([]byte, m.WriteBuf.Len())
+	copy(out, m.WriteBuf.Bytes())
+	return out
+}
+
+func (m *MockConn) GetWrittenLen() int {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	return m.WriteBuf.Len()
+}
+
+func (m *MockConn) ResetWriteBuf() {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.WriteBuf.Reset()
 }
 
 func (m *MockConn) LocalAddr() net.Addr {

@@ -14,8 +14,6 @@ import (
 )
 
 func TestHandleGetIdentity_Success(t *testing.T) {
-	t.Parallel()
-
 	testUUID := [16]byte{
 		0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
 		0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10,
@@ -43,12 +41,12 @@ func TestHandleGetIdentity_Success(t *testing.T) {
 	expectedPayloadSize, _ := expectedResponsePacket.ExpectedLen()
 	expectedTotalLen := 3 + expectedPayloadSize
 
-	if conn.WriteBuf.Len() != expectedTotalLen {
+	if conn.GetWrittenLen() != expectedTotalLen {
 		t.Fatalf("response length mismatch:\n\tgot:  %d\n\twant: %d",
-			conn.WriteBuf.Len(), expectedTotalLen)
+			conn.GetWrittenLen(), expectedTotalLen)
 	}
 
-	responseData := conn.WriteBuf.Bytes()
+	responseData := conn.GetWrittenBytes()
 
 	if responseData[0] != packet.TypeGetIdentityResponse {
 		t.Errorf("wrong packet type:\n\tgot:  %x\n\twant: %x",
@@ -74,8 +72,6 @@ func TestHandleGetIdentity_Success(t *testing.T) {
 }
 
 func TestHandleGetIdentity_WriteError(t *testing.T) {
-	t.Parallel()
-
 	s := &Server{
 		Pi: &identity.PrivateIdentity{
 			UUID:   [16]byte{0x01, 0x02, 0x03, 0x04},
@@ -92,8 +88,6 @@ func TestHandleGetIdentity_WriteError(t *testing.T) {
 }
 
 func TestHandleGetIdentity_NetworkError(t *testing.T) {
-	t.Parallel()
-
 	s := &Server{
 		Pi: &identity.PrivateIdentity{
 			UUID:   [16]byte{0x01, 0x02, 0x03, 0x04},
@@ -114,8 +108,6 @@ func TestHandleGetIdentity_NetworkError(t *testing.T) {
 }
 
 func TestHandleGetIdentity_ZeroValues(t *testing.T) {
-	t.Parallel()
-
 	testUUID := [16]byte{}
 	testPubKey := [32]byte{}
 
@@ -135,12 +127,12 @@ func TestHandleGetIdentity_ZeroValues(t *testing.T) {
 	expectedPayloadSize, _ := expectedResponsePacket.ExpectedLen()
 	expectedTotalLen := 3 + expectedPayloadSize
 
-	if conn.WriteBuf.Len() != expectedTotalLen {
+	if conn.GetWrittenLen() != expectedTotalLen {
 		t.Fatalf("response length mismatch:\n\tgot:  %d\n\twant: %d",
-			conn.WriteBuf.Len(), expectedTotalLen)
+			conn.GetWrittenLen(), expectedTotalLen)
 	}
 
-	responseData := conn.WriteBuf.Bytes()
+	responseData := conn.GetWrittenBytes()
 	body := responseData[3:]
 
 	if !bytes.Equal(body[:16], testUUID[:]) {
@@ -155,8 +147,6 @@ func TestHandleGetIdentity_ZeroValues(t *testing.T) {
 }
 
 func TestHandleGetIdentity_MultipleRequests(t *testing.T) {
-	t.Parallel()
-
 	testUUID := [16]byte{0x01, 0x02, 0x03, 0x04}
 	testPubKey := [32]byte{0xaa, 0xbb, 0xcc, 0xdd}
 
@@ -176,12 +166,12 @@ func TestHandleGetIdentity_MultipleRequests(t *testing.T) {
 		conn := testutil.NewMockConn([]byte{})
 		handleGetIdentity(pkt, conn, s)
 
-		if conn.WriteBuf.Len() != expectedTotalLen {
+		if conn.GetWrittenLen() != expectedTotalLen {
 			t.Errorf("request %d: response length mismatch:\n\tgot:  %d\n\twant: %d",
-				i, conn.WriteBuf.Len(), expectedTotalLen)
+				i, conn.GetWrittenLen(), expectedTotalLen)
 		}
 
-		responseData := conn.WriteBuf.Bytes()
+		responseData := conn.GetWrittenBytes()
 		body := responseData[3:]
 
 		if !bytes.Equal(body[:16], testUUID[:]) {
@@ -195,8 +185,6 @@ func TestHandleGetIdentity_MultipleRequests(t *testing.T) {
 }
 
 func TestHandleGetIdentity_ConcurrentRequests(t *testing.T) {
-	t.Parallel()
-
 	testUUID := [16]byte{0x01, 0x02, 0x03, 0x04}
 	testPubKey := [32]byte{0xaa, 0xbb, 0xcc, 0xdd}
 
@@ -223,12 +211,12 @@ func TestHandleGetIdentity_ConcurrentRequests(t *testing.T) {
 			conn := testutil.NewMockConn([]byte{})
 			handleGetIdentity(pkt, conn, s)
 
-			if conn.WriteBuf.Len() != expectedTotalLen {
+			if conn.GetWrittenLen() != expectedTotalLen {
 				t.Errorf("concurrent request %d: response length mismatch:\n\tgot:  %d\n\twant: %d",
-					iteration, conn.WriteBuf.Len(), expectedTotalLen)
+					iteration, conn.GetWrittenLen(), expectedTotalLen)
 			}
 
-			responseData := conn.WriteBuf.Bytes()
+			responseData := conn.GetWrittenBytes()
 			body := responseData[3:]
 
 			if !bytes.Equal(body[:16], testUUID[:]) {
@@ -245,8 +233,6 @@ func TestHandleGetIdentity_ConcurrentRequests(t *testing.T) {
 }
 
 func TestHandleGetIdentity_IdentityNotModified(t *testing.T) {
-	t.Parallel()
-
 	originalUUID := [16]byte{0x01, 0x02, 0x03, 0x04}
 	originalPubKey := [32]byte{0xaa, 0xbb, 0xcc, 0xdd}
 
@@ -272,8 +258,6 @@ func TestHandleGetIdentity_IdentityNotModified(t *testing.T) {
 }
 
 func TestHandleGetIdentity_DifferentRemoteAddresses(t *testing.T) {
-	t.Parallel()
-
 	tests := []struct {
 		name string
 		addr net.Addr
@@ -297,8 +281,6 @@ func TestHandleGetIdentity_DifferentRemoteAddresses(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
 			s := &Server{
 				Pi: &identity.PrivateIdentity{
 					UUID:   testUUID,
@@ -315,9 +297,9 @@ func TestHandleGetIdentity_DifferentRemoteAddresses(t *testing.T) {
 			expectedPayloadSize, _ := expectedResponsePacket.ExpectedLen()
 			expectedTotalLen := 3 + expectedPayloadSize
 
-			if conn.WriteBuf.Len() != expectedTotalLen {
+			if conn.GetWrittenLen() != expectedTotalLen {
 				t.Errorf("response length mismatch for %s:\n\tgot:  %d\n\twant: %d",
-					tt.addr, conn.WriteBuf.Len(), expectedTotalLen)
+					tt.addr, conn.GetWrittenLen(), expectedTotalLen)
 			}
 		})
 	}

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"io"
 	"net"
+	"sync"
 
 	"github.com/Grolleau-Benjamin/Dynamic_Onion_Routing/internal/logger"
 	"github.com/Grolleau-Benjamin/Dynamic_Onion_Routing/internal/protocol/packet"
@@ -21,7 +22,11 @@ var handlerRegistry = map[uint8]HandlerFunc{
 }
 
 func (s *Server) handleConn(conn net.Conn) {
+	var wg sync.WaitGroup
+
 	defer func() {
+		wg.Wait()
+
 		if err := conn.Close(); err != nil {
 			logger.Warnf("error closing connection: %v", err)
 		}
@@ -39,9 +44,16 @@ func (s *Server) handleConn(conn net.Conn) {
 			return
 		}
 
-		h := handlerRegistry[pkt.Type()]
+		h, ok := handlerRegistry[pkt.Type()]
+		if !ok {
+			logger.Warnf("[%s] no handler for packet type 0x%02x", remote, pkt.Type())
+			return
+		}
 
+		wg.Add(1)
 		go func(p packet.Packet) {
+			defer wg.Done()
+
 			defer func() {
 				if r := recover(); r != nil {
 					logger.Errorf("[%s] PANIC in handler: %v", remote, r)

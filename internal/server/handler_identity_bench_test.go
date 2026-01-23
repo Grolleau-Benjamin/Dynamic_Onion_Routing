@@ -22,7 +22,7 @@ func BenchmarkHandleGetIdentity(b *testing.B) {
 
 	b.ResetTimer()
 	for b.Loop() {
-		conn.WriteBuf.Reset()
+		conn.ResetWriteBuf()
 		handleGetIdentity(pkt, conn, s)
 	}
 }
@@ -42,7 +42,7 @@ func BenchmarkHandleGetIdentity_Parallel(b *testing.B) {
 		localConn := testutil.NewMockConn([]byte{})
 
 		for pb.Next() {
-			localConn.WriteBuf.Reset()
+			localConn.ResetWriteBuf()
 
 			handleGetIdentity(pkt, localConn, s)
 		}
