@@ -75,6 +75,9 @@ go test -cover ./internal/protocol/identity
 go test -coverprofile=coverage.out ./internal/protocol/identity
 go tool cover -func=coverage.out
 
+# See which line is cover with an HTML render
+go tool cover -html=coverage.out
+
 # Run with race detector
 go test -race ./...
 
