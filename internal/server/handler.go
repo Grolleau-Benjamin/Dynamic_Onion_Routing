@@ -39,11 +39,7 @@ func (s *Server) handleConn(conn net.Conn) {
 			return
 		}
 
-		h, ok := handlerRegistry[pkt.Type()]
-		if !ok {
-			logger.Warnf("[%s] no handler for packet type 0x%02x", remote, pkt.Type())
-			return
-		}
+		h := handlerRegistry[pkt.Type()]
 
 		go func(p packet.Packet) {
 			defer func() {
