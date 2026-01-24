@@ -7,6 +7,8 @@ const (
 	TypeGetIdentityResponse uint8 = 0x01
 
 	TypeOnionPacket uint8 = 0x10
+
+	HeaderSize int = 3
 )
 
 type Packet interface {

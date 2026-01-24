@@ -8,7 +8,7 @@ import (
 )
 
 func ReadPacket(r io.Reader) (Packet, error) {
-	header := make([]byte, 3)
+	header := make([]byte, HeaderSize)
 	if _, err := io.ReadFull(r, header); err != nil {
 		return nil, err
 	}
