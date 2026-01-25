@@ -1,0 +1,110 @@
+BuildOnion(): {
+  input: {
+    direction: right
+    payload: "payload\n[]byte"
+    path: "path\n[]identity.CryptoGroup"
+    dest: "dest\nidentity.Endpoint"
+  }
+
+  input -> computeOverhead: "initialize"
+
+  computeOverhead: {
+    label: "overhead = computePathOverhead(path, dest)"
+  }
+
+  loop: {
+    label: "for i = len(path)-1 ... 0"
+  }
+
+  computeOverhead -> loop: "total packet size < max size"
+
+  group: {
+    shape: class
+    label: "group = path[i]"
+    CipherKey: "[32]byte"
+    EPK: "[32]byte"
+    Group: "RelayGroup"
+  }
+
+  loop -> group: "access"
+
+  ciphered: {
+    shape: class
+    label: "ciphered = OnionLayerCiphered"
+    LastServer: bool
+    NextHops: \[\]identity.Endpoint
+    UtilPayloadLength: uint16
+    Payload: \[\]byte
+  }
+
+  group -> ciphered: "construct"
+
+  cipheredBytes: {
+    label: "cipheredBytes = ciphered.Bytes()"
+  }
+
+  ciphered -> cipheredBytes: "serialize"
+
+  nonce: {
+    label: "payloadNonce = rand(12B)"
+  }
+
+  cipheredBytes -> nonce: "generate nonce"
+
+  wrappedKeyGen: {
+    label: "NewWrappedKeys(group)"
+    direction: right
+
+    ecdh: {label: "ECDH X25519\nsharedSecret = X25519(ESK, relay.PubKey)"}
+    hkdf: {label: "HKDF-SHA256\nwrappingKey = HKDF(sharedSecret,\nsalt, info)"}
+    plaintext: {label: "plaintext = UUID || CipherKey"}
+    encryptWK: {label: "ChaCha20-Poly1305\ncipherText = Encrypt(wrappingKey, nonce, plaintext)"}
+    store: {label: "WrappedKey = {nonce, cipherText}"}
+
+    ecdh -> hkdf: "derive wrapping key"
+    hkdf -> plaintext: "derive plaintext"
+    plaintext -> encryptWK: "encrypt wrapped key"
+    encryptWK -> store: "store wrapped key"
+  }
+
+  nonce -> wrappedKeyGen.ecdh: "generate wrapped keys using group.EPK"
+
+  lenMask: {
+    label: "cipherLenXor = expectedLen XOR mask16"
+  }
+
+  wrappedKeyGen.store -> lenMask: "collect wrapped keys"
+
+  onionLayer: {
+    shape: class
+    label: "layer = OnionLayer"
+    EPK: \[32\]byte
+    WrappedKeys: \[\]WrappedKey
+    PayloadNonce: \[12\]byte
+    CipherTextLenXor: uint16
+    CipherText: \[\]byte
+  }
+
+  lenMask -> onionLayer: "cipher layer fields"
+
+  encrypt: {
+    label: "layer.cipherText = ChachaEncrypt(CipherKey,Nonce,cipheredBytes,header)"
+  }
+
+  onionLayer -> encrypt: "AEAD encrypt cipheredBytes"
+
+  update: {
+    label: "nextHops = Group.Relays\nisLast = false\ncurrentPayload = layer.Bytes()"
+  }
+
+  encrypt -> update: "get encrypted layer"
+
+  update -> loop: "next iteration"
+
+  loop -> returnLayer: "done"
+
+  returnLayer: {
+    shape: cloud
+    label: "return layer"
+  }
+}
