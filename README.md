@@ -1,25 +1,34 @@
-# DOR - Dynamic Onion Routing
+<h1 align="center"> DOR - Dynamic Onion Routing </h1>
+<p align="center">
+  <a href="https://go.dev/">
+    <img src="https://img.shields.io/badge/language-Go-blue?logo=go" alt="Golang">
+  </a>
+  <img src="https://img.shields.io/badge/status-in%20progress-yellow" alt="Status">
+  <img src="https://img.shields.io/github/v/tag/Grolleau-Benjamin/Dynamic_Onion_Routing?label=version" alt="Version">
+  <img src="https://goreportcard.com/badge/github.com/Grolleau-Benjamin/Dynamic_Onion_Routing" alt="go Report">
+</p>
+
 DOR is a Go implementation of a dynamic onion routing protocol for anonymous network communication. It provides multi-layered encryption similar to Tor, with support for flexible path construction and relay selection.
 
-This project was developed as part of the 3rd-year R&I semester project at ENSEIRB-MATMECA (France). The [French subject document](./docs/french_subject.pdf) details the objectives.
+This project was developed as part of the 3rd-year Networks & Computer Science semester project at ENSEIRB-MATMECA (France). This [French subject document](./docs/french_subject.pdf) details the objectives and specifications.
 
 > [!WARNING]
-> This is a research/educational implementation. For production anonymity needs, use established solutions like Tor.
+> This is a research/educational implementation. For production anonymity needs, use established solutions like [Tor](https://www.torproject.org/).
 
 ![Screen](./docs/img/demo.png)
 
-## Features
-- Multi-layer Onion Encryption: Each message is encrypted in multiple layers, with each relay peeling off one layer
-- Dynamic Path Selection: Flexible routing through multiple endpoint in relay groups
-- IPv4/IPv6 Support: Full dual-stack networking support
-- TUI Mode: Optional terminal UI for better visualization
-- Wireshark Integration: Lua plugin for protocol analysis
+## 🛠️ Features
+- Multi-layer Onion Encryption: Each message is encrypted in multiple layers, with each relay peeling off one layer.
+- Dynamic Path Selection: Flexible routing through multiple endpoint in relay groups.
+- IPv4/IPv6 Support: Full dual-stack networking support.
+- TUI Mode: Optional terminal UI for better visualization.
+- Wireshark Integration: Lua plugin for protocol analysis.
 
-## Prerequisites
-- Go 1.25 or higher (CI needs it)
+## 📋 Prerequisites
+- Go 1.25 or higher (required for CI execution)
 - Network access for relay communication
 
-## Quick Start
+## 🚀 Quick Start
 
 ### Installation
 ```bash
@@ -62,8 +71,8 @@ Example:
   --onion-path "entryA:port,entryB:port|middleA:port|exitA:port,exitB:port"
 ```
 
-## Documentation
-All documentation is stored in the [docs](./docs) directory.
+## 📜 Documentation
+All documentation can be found in the [docs](./docs) directory.
 
 ### Architecture
 - [Client Cli Architecture](./docs/architecture/client_cli.md)
@@ -72,7 +81,7 @@ All documentation is stored in the [docs](./docs) directory.
 ### Protocol Specifications
 - [Onion Packet - Average Size Calculation](./docs/packet/OnionPacket_AverageSizeCalculation.md)
 
-##  Wireshark Plugin
+## 🔌 Wireshark Plugin
 In addition to the demonstrator, this protocol also provides a Wireshark Lua plugin to observe DOR protocol exchanges.
 
 Copy the plugin to your Wireshark plugins directory:
