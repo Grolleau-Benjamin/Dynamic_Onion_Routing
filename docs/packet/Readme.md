@@ -20,7 +20,7 @@ Crypto seeding is the process of deriving encryption keys for each layer. Each r
 
 ### Onion Packet Structure
 
-![Onion Packet Datagram](./onion-builder.svg)
+![Onion Packet Datagram](./onion_builder.svg)
 
 The onion packet datagram illustrates:
 
@@ -28,6 +28,17 @@ The onion packet datagram illustrates:
 - Layered encryption organization
 - Payload location within the packet
 - Forward direction and processing order
+
+### Onion Sequence & Processing
+
+![Onion Processing Sequence](./onion_sequence.d2)
+
+The onion sequence diagram shows:
+
+- Step-by-step processing of the onion packet through relays
+- Layer decryption and unwrapping at each relay
+- Key derivation and forwarding operations
+- Message delivery to the final recipient
 
 ### Size Calculations
 

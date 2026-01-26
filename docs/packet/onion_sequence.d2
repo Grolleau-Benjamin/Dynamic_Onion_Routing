@@ -1,0 +1,37 @@
+shape: sequence_diagram
+
+alice: "Alice (client)"
+bob: "Bob (relay 1)"
+roger: "Roger (relay 2)"
+sarah: "Sarah (relay 3)"
+dest: "Destination"
+
+IdentityBootstrap: {
+  label: "Identity bootstrap (identity endpoint)"
+
+  alice -> bob.id: GetIdentityRequest
+  bob.id -> alice: "GetIdentityResponse {UUID: 16B, PubKey: 32B}"
+
+  alice -> roger.id: GetIdentityRequest
+  roger.id -> alice: "GetIdentityResponse {UUID: 16B, PubKey: 32B}"
+
+  alice -> sarah.id: GetIdentityRequest
+  sarah.id -> alice: "GetIdentityResponse {UUID: 16B, PubKey: 32B}"
+}
+
+OnionRouting: {
+  label: "Onion build + routing (fixed size)"
+
+  alice.crypto -> alice.crypto: "Build onion + encrypt 3 layers"
+  alice.crypto -> alice.crypto: "Pad OnionPacket to 4096B"
+
+  alice -> bob.relay: "OnionPacket (4096B)"
+  bob.relay -> bob.relay: "Decrypt layer 1"
+  bob.relay -> roger.relay: "OnionPacket (4096B)"
+
+  roger.relay -> roger.relay: "Decrypt layer 2"
+  roger.relay -> sarah.relay: "OnionPacket (4096B)"
+
+  sarah.relay -> sarah.relay: "Decrypt layer 3 (final)"
+  sarah.relay -> dest: "Forward payload"
+}
