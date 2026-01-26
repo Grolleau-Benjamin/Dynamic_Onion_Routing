@@ -8,6 +8,10 @@
   <img src="https://goreportcard.com/badge/github.com/Grolleau-Benjamin/Dynamic_Onion_Routing" alt="go Report">
 </p>
 
+<p align="center">
+  <img src="./docs/img/logo.png" width="50%">
+</p>
+
 DOR is a Go implementation of a dynamic onion routing protocol for anonymous network communication. It provides multi-layered encryption similar to Tor, with support for flexible path construction and relay selection.
 
 This project was developed as part of the 3rd-year Networks & Computer Science semester project at ENSEIRB-MATMECA (France). This [French subject document](./docs/french_subject.pdf) details the objectives and specifications.

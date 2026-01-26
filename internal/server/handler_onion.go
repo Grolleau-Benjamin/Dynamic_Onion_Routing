@@ -17,45 +17,52 @@ func handleOnionPacket(p packet.Packet, conn net.Conn, s *Server) {
 	logger.Debugf("[%s] Onion packet received", conn.RemoteAddr())
 
 	onionPkt, err := assertOnionPacketType(
-		p, 
+		p,
 		conn,
 	)
-	if err != nil { return }
+	if err != nil {
+		return
+	}
 
 	layer, err := parseInboundLayer(
-		onionPkt, 
+		onionPkt,
 		conn,
 	)
-	if err != nil { return }
+	if err != nil {
+		return
+	}
 
 	sessionKey, err := unwrapSessionKey(
 		layer,
-		s, 
+		s,
 		conn,
 	)
-	if err != nil { return }
+	if err != nil {
+		return
+	}
 
 	olc, err := decryptNextLayer(
-		layer, 
-		sessionKey, 
+		layer,
+		sessionKey,
 		conn,
 	)
-	if err != nil { return }
+	if err != nil {
+		return
+	}
 
 	if olc.LastServer {
 		handleFinalDestination(
-			olc, 
+			olc,
 			conn,
 		)
 		return
 	}
 
 	relayToNextHops(
-		olc, 
+		olc,
 		conn,
 	)
 }
-
 
 func assertOnionPacketType(p packet.Packet, conn net.Conn) (*packet.OnionPacket, error) {
 	onionPkt, ok := p.(*packet.OnionPacket)
@@ -67,7 +74,6 @@ func assertOnionPacketType(p packet.Packet, conn net.Conn) (*packet.OnionPacket,
 	}
 	return onionPkt, nil
 }
-
 
 func parseInboundLayer(pkt *packet.OnionPacket, conn net.Conn) (*onion.OnionLayer, error) {
 	layer := &onion.OnionLayer{}
@@ -86,7 +92,6 @@ func parseInboundLayer(pkt *packet.OnionPacket, conn net.Conn) (*onion.OnionLaye
 	)
 	return layer, nil
 }
-
 
 func unwrapSessionKey(layer *onion.OnionLayer, s *Server, conn net.Conn) ([32]byte, error) {
 	sharedSecret, err := curve25519.X25519(s.Pi.PrivKey[:], layer.EPK[:])
@@ -110,12 +115,14 @@ func unwrapSessionKey(layer *onion.OnionLayer, s *Server, conn net.Conn) ([32]by
 
 	for _, wk := range layer.WrappedKeys {
 		res, err := crypto.ChachaDecrypt(
-			wrappingKey, 
-			wk.Nonce, 
-			wk.CipherText[:], 
+			wrappingKey,
+			wk.Nonce,
+			wk.CipherText[:],
 			[]byte("DORv1:WrappedKey"),
 		)
-		if err != nil { continue }
+		if err != nil {
+			continue
+		}
 
 		if bytes.Equal(res[:16], s.Pi.UUID[:]) {
 			var sessionKey [32]byte
@@ -141,9 +148,9 @@ func decryptNextLayer(layer *onion.OnionLayer, sessionKey [32]byte, conn net.Con
 	}
 
 	plaintext, err := crypto.ChachaDecrypt(
-		sessionKey, 
-		layer.PayloadNonce, 
-		layer.CipherText, 
+		sessionKey,
+		layer.PayloadNonce,
+		layer.CipherText,
 		header,
 	)
 	if err != nil {
