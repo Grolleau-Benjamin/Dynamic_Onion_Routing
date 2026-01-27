@@ -13,7 +13,7 @@ Detailed documentation of the system architecture, including:
 
 These documents explain the concurrency models, event handling, and design decisions behind the client implementations.
 
-### [Protocol & Packets](./packet/README.md)
+### [Protocol & Packets](./packet/Readme.md)
 
 Protocol specifications and technical details:
 
