@@ -31,7 +31,7 @@ The onion packet datagram illustrates:
 
 ### Onion Sequence & Processing
 
-![Onion Processing Sequence](./onion_sequence.d2)
+![Onion Processing Sequence](./onion_sequence.svg)
 
 The onion sequence diagram shows:
 
