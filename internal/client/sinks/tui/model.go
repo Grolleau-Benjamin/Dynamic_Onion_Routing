@@ -2,6 +2,7 @@ package tui
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/Grolleau-Benjamin/Dynamic_Onion_Routing/internal/client"
 	"github.com/Grolleau-Benjamin/Dynamic_Onion_Routing/internal/client/model"
@@ -139,17 +140,30 @@ func (m tuiModel) startProcessing() tea.Cmd {
 
 			for gi := range msg.Path {
 				group := &msg.Path[gi]
-
 				if err = group.GenerateCryptoMaterial(); err != nil {
 					return errorMsg{err: err}
 				}
 				m.sink.client.EmitLog(fmt.Sprintf("crypto material generated for %s", group))
 
+				writeIdx := 0
 				for ri := range group.Group.Relays {
 					relay := &group.Group.Relays[ri]
 					if err = m.sink.client.RetrieveRelayIdentity(relay); err != nil {
+						if strings.Contains(err.Error(), "connect: connection refused") {
+							m.sink.client.EmitLog(fmt.Sprintf("relay %s unreachable, skipping", relay.Ep.String()))
+							continue
+						}
 						return errorMsg{err: err}
 					}
+					if writeIdx != ri {
+						group.Group.Relays[writeIdx] = group.Group.Relays[ri]
+					}
+					writeIdx++
+				}
+				group.Group.Relays = group.Group.Relays[:writeIdx]
+
+				if len(group.Group.Relays) == 0 {
+					return errorMsg{err: fmt.Errorf("no valid relays in group %d", gi)}
 				}
 			}
 
