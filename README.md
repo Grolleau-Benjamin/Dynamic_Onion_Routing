@@ -1,4 +1,4 @@
-<h1 align="center"> DOR - Dynamic Onion Routing </h1>
+<h1 align="center"> DOR - Dynamic Onion Routing</h1>
 <p align="center">
   <a href="https://go.dev/">
     <img src="https://img.shields.io/badge/language-Go-blue?logo=go" alt="Golang">
