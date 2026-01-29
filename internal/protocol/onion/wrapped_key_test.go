@@ -306,3 +306,139 @@ func TestNewWrappedKeys(t *testing.T) {
 		})
 	}
 }
+
+func BenchmarkNewWrappedKeys3Relays(b *testing.B) {
+	cryptoGrp := &identity.CryptoGroup{
+		Group: identity.RelayGroup{
+			Relays: []identity.Relay{
+				{
+					Ep: identity.Endpoint{
+						IP:   net.ParseIP("127.0.0.1"),
+						Port: 62503,
+					},
+					UUID: [16]byte{
+						0x01, 0x02, 0x03, 0x04,
+					},
+					PubKey: [32]byte{
+						0x05, 0x06, 0x07, 0x08,
+					},
+				},
+				{
+					Ep: identity.Endpoint{
+						IP:   net.ParseIP("127.0.0.2"),
+						Port: 62504,
+					},
+					UUID: [16]byte{
+						0x11, 0x12, 0x13, 0x14,
+					},
+					PubKey: [32]byte{
+						0x15, 0x16, 0x17, 0x18,
+					},
+				},
+				{
+					Ep: identity.Endpoint{
+						IP:   net.ParseIP("127.0.0.3"),
+						Port: 62505,
+					},
+					UUID: [16]byte{
+						0x21, 0x22, 0x23, 0x24,
+					},
+					PubKey: [32]byte{
+						0x25, 0x26, 0x27, 0x28,
+					},
+				},
+			},
+		},
+		CipherKey: [32]byte{
+			0xaa, 0xbb, 0xcc, 0xdd,
+		},
+		EPK: [32]byte{
+			0xee, 0xff, 0x11, 0x22,
+		},
+		ESK: [32]byte{
+			0x33, 0x44, 0x55, 0x66,
+		},
+	}
+
+	b.ResetTimer()
+	for b.Loop() {
+		_, err := onion.NewWrappedKeys(cryptoGrp)
+		if err != nil {
+			b.Fatalf("NewWrappedKeys() error = %v", err)
+		}
+	}
+}
+
+func BenchmarkNewWrappedKeys1Relay(b *testing.B) {
+	cryptoGrp := &identity.CryptoGroup{
+		Group: identity.RelayGroup{
+			Relays: []identity.Relay{
+				{
+					Ep: identity.Endpoint{
+						IP:   net.ParseIP("127.0.0.1"),
+						Port: 62503,
+					},
+					UUID: [16]byte{
+						0x01, 0x02, 0x03, 0x04,
+					},
+					PubKey: [32]byte{
+						0x05, 0x06, 0x07, 0x08,
+					},
+				},
+			},
+		},
+		CipherKey: [32]byte{
+			0x11, 0x22, 0xcc, 0xdd,
+		},
+		EPK: [32]byte{
+			0xee, 0xff, 0x11, 0x22,
+		},
+		ESK: [32]byte{
+			0x33, 0x44, 0xaa, 0xbb,
+		},
+	}
+
+	b.ResetTimer()
+	for b.Loop() {
+		_, err := onion.NewWrappedKeys(cryptoGrp)
+		if err != nil {
+			b.Fatalf("NewWrappedKeys() error = %v", err)
+		}
+	}
+}
+
+func BenchmarkNewWrappedKeys2Relays(b *testing.B) {
+	cryptoGrp := &identity.CryptoGroup{
+		Group: identity.RelayGroup{
+			Relays: []identity.Relay{
+				{
+					Ep: identity.Endpoint{
+						IP:   net.ParseIP("127.0.0.1"),
+						Port: 62503,
+					},
+					UUID:   [16]byte{0x01, 0x02, 0x03, 0x04},
+					PubKey: [32]byte{0x05, 0x06, 0x07, 0x08},
+				},
+				{
+					Ep: identity.Endpoint{
+						IP:   net.ParseIP("127.0.0.2"),
+						Port: 62504,
+					},
+					UUID:   [16]byte{0x11, 0x12, 0x13, 0x14},
+					PubKey: [32]byte{0x15, 0x16, 0x17, 0x18},
+				},
+			},
+		},
+		CipherKey: [32]byte{0xaa, 0xbb, 0xcc, 0xdd},
+		EPK:       [32]byte{0xee, 0xff, 0x11, 0x22},
+		ESK:       [32]byte{0x33, 0x44, 0x55, 0x66},
+	}
+
+	b.ResetTimer()
+	for b.Loop() {
+		_, err := onion.NewWrappedKeys(cryptoGrp)
+		if err != nil {
+			b.Fatalf("NewWrappedKeys() error = %v", err)
+		}
+	}
+}

@@ -28,6 +28,18 @@ func TestBytes(t *testing.T) {
 			errContains: "too much wrappedKeys",
 		},
 		{
+			name: "equals to maxWrappedKeys",
+			layer: onion.OnionLayerCiphered{
+				NextHops: []identity.Endpoint{
+					{IP: net.ParseIP("8.8.8.8"), Port: 31033},
+					{IP: net.ParseIP("8.8.4.4"), Port: 29103},
+					{IP: net.ParseIP("8.8.4.4"), Port: 62503},
+				},
+			},
+			wantErr: false,
+			want:    []byte{3, 0, 0, 4, 121, 57, 8, 8, 8, 8, 4, 113, 175, 8, 8, 4, 4, 4, 244, 39, 8, 8, 4, 4},
+		},
+		{
 			name: "normal case",
 			layer: onion.OnionLayerCiphered{
 				LastServer:        true,

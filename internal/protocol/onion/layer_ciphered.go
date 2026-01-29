@@ -50,7 +50,7 @@ func (olc *OnionLayerCiphered) Bytes() ([]byte, error) {
 		flags |= FlagLastServer
 	}
 
-	if len(olc.NextHops) >= MaxWrappedKey {
+	if len(olc.NextHops) > MaxWrappedKey {
 		return nil, fmt.Errorf("too much wrappedKeys, max is %d", MaxWrappedKey)
 	}
 	flags |= uint8(len(olc.NextHops)) & FlagNbNextHops

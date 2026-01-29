@@ -374,3 +374,218 @@ func TestBuildOnion_OutputSize(t *testing.T) {
 			len(layerBytes), PacketSize)
 	}
 }
+
+func BenchmarkBuildOnion(b *testing.B) {
+	dest := identity.Endpoint{IP: net.ParseIP("192.168.1.1"), Port: 9000}
+	path := []identity.CryptoGroup{
+		{
+			Group: identity.RelayGroup{
+				Relays: []identity.Relay{
+					{
+						Ep:     identity.Endpoint{IP: net.ParseIP("127.0.0.1"), Port: 8080},
+						PubKey: generateValidX25519Key(),
+					},
+				},
+			},
+			EPK:       generateValidX25519Key(),
+			ESK:       generateValidX25519Key(),
+			CipherKey: generateValidX25519Key(),
+		},
+		{
+			Group: identity.RelayGroup{
+				Relays: []identity.Relay{
+					{
+						Ep:     identity.Endpoint{IP: net.ParseIP("127.0.0.2"), Port: 8081},
+						PubKey: generateValidX25519Key(),
+					},
+				},
+			},
+			EPK:       generateValidX25519Key(),
+			ESK:       generateValidX25519Key(),
+			CipherKey: generateValidX25519Key(),
+		},
+		{
+			Group: identity.RelayGroup{
+				Relays: []identity.Relay{
+					{
+						Ep:     identity.Endpoint{IP: net.ParseIP("127.0.0.3"), Port: 8082},
+						PubKey: generateValidX25519Key(),
+					},
+				},
+			},
+			EPK:       generateValidX25519Key(),
+			ESK:       generateValidX25519Key(),
+			CipherKey: generateValidX25519Key(),
+		},
+	}
+	payload := []byte("test payload for benchmarking")
+
+	b.ResetTimer()
+	for b.Loop() {
+		_, err := BuildOnion(dest, path, payload)
+		if err != nil {
+			b.Fatalf("BuildOnion() error = %v", err)
+		}
+	}
+}
+
+func BenchmarkBuildOnion1Hop(b *testing.B) {
+	dest := identity.Endpoint{IP: net.ParseIP("192.168.1.1"), Port: 9000}
+	path := []identity.CryptoGroup{
+		{
+			Group: identity.RelayGroup{
+				Relays: []identity.Relay{
+					{
+						Ep:     identity.Endpoint{IP: net.ParseIP("127.0.0.1"), Port: 8080},
+						PubKey: generateValidX25519Key(),
+					},
+				},
+			},
+			EPK:       generateValidX25519Key(),
+			ESK:       generateValidX25519Key(),
+			CipherKey: generateValidX25519Key(),
+		},
+	}
+	payload := []byte("test payload")
+
+	b.ResetTimer()
+	for b.Loop() {
+		_, err := BuildOnion(dest, path, payload)
+		if err != nil {
+			b.Fatalf("BuildOnion() error = %v", err)
+		}
+	}
+}
+
+func BenchmarkBuildOnion5Hops(b *testing.B) {
+	dest := identity.Endpoint{IP: net.ParseIP("192.168.1.1"), Port: 9000}
+	path := make([]identity.CryptoGroup, MaxJump)
+	for i := range path {
+		path[i] = identity.CryptoGroup{
+			Group: identity.RelayGroup{
+				Relays: []identity.Relay{
+					{
+						Ep:     identity.Endpoint{IP: net.ParseIP("127.0.0.1"), Port: uint16(8080 + i)},
+						PubKey: generateValidX25519Key(),
+					},
+				},
+			},
+			EPK:       generateValidX25519Key(),
+			ESK:       generateValidX25519Key(),
+			CipherKey: generateValidX25519Key(),
+		}
+	}
+	payload := []byte("test payload")
+
+	b.ResetTimer()
+	for b.Loop() {
+		_, err := BuildOnion(dest, path, payload)
+		if err != nil {
+			b.Fatalf("BuildOnion() error = %v", err)
+		}
+	}
+}
+
+func BenchmarkBuildOnionLargePayload(b *testing.B) {
+	dest := identity.Endpoint{IP: net.ParseIP("192.168.1.1"), Port: 9000}
+	path := []identity.CryptoGroup{
+		{
+			Group: identity.RelayGroup{
+				Relays: []identity.Relay{
+					{
+						Ep:     identity.Endpoint{IP: net.ParseIP("127.0.0.1"), Port: 8080},
+						PubKey: generateValidX25519Key(),
+					},
+				},
+			},
+			EPK:       generateValidX25519Key(),
+			ESK:       generateValidX25519Key(),
+			CipherKey: generateValidX25519Key(),
+		},
+	}
+	payload := make([]byte, 2048)
+
+	b.ResetTimer()
+	for b.Loop() {
+		_, err := BuildOnion(dest, path, payload)
+		if err != nil {
+			b.Fatalf("BuildOnion() error = %v", err)
+		}
+	}
+}
+
+func BenchmarkBuildOnionMultipleRelaysPerGroup(b *testing.B) {
+	dest := identity.Endpoint{IP: net.ParseIP("192.168.1.1"), Port: 9000}
+	path := []identity.CryptoGroup{
+		{
+			Group: identity.RelayGroup{
+				Relays: []identity.Relay{
+					{
+						Ep:     identity.Endpoint{IP: net.ParseIP("127.0.0.1"), Port: 8080},
+						PubKey: generateValidX25519Key(),
+					},
+					{
+						Ep:     identity.Endpoint{IP: net.ParseIP("127.0.0.2"), Port: 8081},
+						PubKey: generateValidX25519Key(),
+					},
+					{
+						Ep:     identity.Endpoint{IP: net.ParseIP("127.0.0.3"), Port: 8082},
+						PubKey: generateValidX25519Key(),
+					},
+				},
+			},
+			EPK:       generateValidX25519Key(),
+			ESK:       generateValidX25519Key(),
+			CipherKey: generateValidX25519Key(),
+		},
+	}
+	payload := []byte("test payload")
+
+	b.ResetTimer()
+	for b.Loop() {
+		_, err := BuildOnion(dest, path, payload)
+		if err != nil {
+			b.Fatalf("BuildOnion() error = %v", err)
+		}
+	}
+}
+
+func BenchmarkBuildOnion3Hops3Relays(b *testing.B) {
+	dest := identity.Endpoint{IP: net.ParseIP("192.168.1.1"), Port: 9000}
+	path := make([]identity.CryptoGroup, 3)
+	for i := range path {
+		path[i] = identity.CryptoGroup{
+			Group: identity.RelayGroup{
+				Relays: []identity.Relay{
+					{
+						Ep:     identity.Endpoint{IP: net.ParseIP("127.0.0.1"), Port: uint16(8080 + i*10)},
+						UUID:   [16]byte{byte(i*3 + 1)},
+						PubKey: generateValidX25519Key(),
+					},
+					{
+						Ep:     identity.Endpoint{IP: net.ParseIP("127.0.0.2"), Port: uint16(8081 + i*10)},
+						UUID:   [16]byte{byte(i*3 + 2)},
+						PubKey: generateValidX25519Key(),
+					},
+					{
+						Ep:     identity.Endpoint{IP: net.ParseIP("127.0.0.3"), Port: uint16(8082 + i*10)},
+						UUID:   [16]byte{byte(i*3 + 3)},
+						PubKey: generateValidX25519Key(),
+					},
+				},
+			},
+			EPK:       generateValidX25519Key(),
+			ESK:       generateValidX25519Key(),
+			CipherKey: generateValidX25519Key(),
+		}
+	}
+	payload := []byte("test payload for full network simulation")
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, err := BuildOnion(dest, path, payload)
+		if err != nil {
+			b.Fatalf("BuildOnion() error = %v", err)
+		}
+	}
+}
