@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="./docs/img/logo.png" width="50%">
+  <img src="./docs/img/mascott.png" width="30%">
 </p>
 
 DOR is a Go implementation of a dynamic onion routing protocol for anonymous network communication. It provides multi-layered encryption similar to Tor, with support for flexible path construction and relay selection.
@@ -100,3 +100,7 @@ cp ./tools/wireshark/dor.lua %APPDATA%/Wireshark/plugins/
 
 > [!NOTE]
 > The plugin does not decrypt ciphertext - it only displays the protocol structure visible on the network.
+
+<p align="center">
+  <img src="./docs/img/logo.png" width="50%">
+</p>
